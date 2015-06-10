@@ -6,7 +6,7 @@ public interface Config {
 	public static final int EXPERT = 2;
 	// all enumeration for level = {BEGINNER, INTERMEDIATE, EXPERT}
 	public static final int GRID_DIMENSTIONS[][] = { 
-		{10, 10}, // for BEGINNER
+		{7, 7}, // for BEGINNER
 		{50, 50}, // for INTERMEDIATE
 		{100, 100} // for EXPERT
 	};
