@@ -15,6 +15,7 @@ public class Grid extends JPanel {
 	private String labelText;
 	private int x;
 	private int y;
+	private boolean exposed;
 	
 	public Grid(int size, int row, int col) {
 		if (size < 0) {
@@ -26,10 +27,14 @@ public class Grid extends JPanel {
 		x = row;
 		y = col;
 		labelText = "";
-//		labelText = Integer.toString(x) + ", " + Integer.toString(y);
+		exposed = false;
+		Dimension dim = new Dimension(size, size);
+		setMinimumSize(dim);
+		setPreferredSize(dim);
+		setMaximumSize(dim);
 		label = new JLabel(labelText, JLabel.CENTER);
 		label.setForeground(Color.BLACK);
-//		label.setBackground(Color.CYAN);
+		label.setOpaque(true);
 		setLayout(new BorderLayout());
 		add(label);
 		
@@ -77,11 +82,29 @@ public class Grid extends JPanel {
 			return true;
 		}
 	}
-
-//	@Override
-//	public void paintComponent(Graphics g) {
-//		super.paintComponent(g);
-//		g.setColor(Color.BLUE);
-//		g.fillRect(0, 0, size, size); 
-//	}
+	
+	public int getRow() {
+		return x;
+	}
+	
+	public int getCol() {
+		return y;
+	}
+	
+	public boolean isExposed() {
+		return exposed == true;
+	}
+	
+	public void setExposed(boolean ex) {
+		exposed = ex;
+	}
+	
+	@Override
+	public String toString() {
+		return "isMine: " + isMine 
+				+ "\nmineCount: " + mineCount
+				+ "\nlabelText: " + labelText
+				+ "\nx: " + x 
+				+ "\ny: " + y;
+	}
 }
