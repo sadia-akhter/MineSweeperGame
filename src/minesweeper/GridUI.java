@@ -15,6 +15,10 @@ public class GridUI extends JPanel implements Config{
 	private int gridCols;
 	private int mines;
 	private Grid[][] theGrid;
+	private int flaggedMines;
+	private int foundMines;
+	private int exposedMines;
+	private int totalgrids;
 	
 	public GridUI(int gameLevel) {
 		if (gameLevel != BEGINNER && gameLevel != INTERMEDIATE && gameLevel !=EXPERT) {
@@ -26,7 +30,12 @@ public class GridUI extends JPanel implements Config{
 		gridCols = GRID_DIMENSTIONS[level][1];
 		mines = MINES[level];
 		theGrid = new Grid[gridRows][gridCols];
-		
+		flaggedMines = 0;
+		foundMines = 0;
+		exposedMines = 0;
+		totalgrids = gridRows * gridCols;
+		System.out.println("totalgrids: " + totalgrids);
+
 		setLayout(new GridLayout(gridRows, gridCols));
 		Border blackBorder = BorderFactory.createLineBorder(Color.BLACK);
 		
@@ -39,7 +48,7 @@ public class GridUI extends JPanel implements Config{
 				theGrid[i][j] = grid;
 			}
 		}	
-		
+				
 		Random r = new Random();
 		int count = 0;
 		int row, col;
@@ -49,30 +58,48 @@ public class GridUI extends JPanel implements Config{
 			if (!theGrid[row][col].isMine()) {
 				theGrid[row][col].setMine(true);
 				theGrid[row][col].setMineCount(0);
-				count++;				
-				incrementMineCount(row-1, col-1);
-				incrementMineCount(row-1, col);
-				incrementMineCount(row-1, col+1);
-				incrementMineCount(row, col-1);
-				incrementMineCount(row, col+1);
-				incrementMineCount(row+1, col-1);
-				incrementMineCount(row+1, col);
-				incrementMineCount(row+1, col+1);		
+				count++;		
+				incrementNeighborMineCount(row, col);				
 			}		
 		}
 	}
 	
-	private void incrementMineCount(int row, int col) {
-		if (row <0 || col < 0 || row >= gridRows || col >= gridCols) {
-			return;
+	private void incrementNeighborMineCount(int row, int col) {
+		for (int i = row - 1; i <= row + 1; i++) {
+			if (i < 0 || i >= gridRows) {
+				continue;
+			}
+			for (int j = col - 1; j <= col + 1; j++) {
+				if (j < 0 || j >= gridCols) {
+					continue;
+				}
+				if(i == row && j == col) {
+					continue;
+				}
+				theGrid[i][j].incrementMineCount();
+			}
 		}
-		
-		if (theGrid[row][col].isMine()) {
-			return;
+	}
+
+	private void showMinesInGrid() {
+		for (int i = 0; i < gridRows; i++) {
+			for (int j = 0; j < gridCols; j++) {
+				if (theGrid[i][j].isFlagged()) {
+					if (theGrid[i][j].isMine()) {
+						theGrid[i][j].getLabel().setBackground(Color.GREEN);
+						theGrid[i][j].setLabelText("F");
+					} else {
+						theGrid[i][j].getLabel().setBackground(Color.RED);
+						theGrid[i][j].setLabelText("F");						
+					}
+				} else {
+					if (theGrid[i][j].isMine()) {
+						theGrid[i][j].setLabelText("M");
+					} 
+				}
+			}
 		}
-		
-		Grid grid = theGrid[row][col];
-		grid.incrementMineCount();
+		repaint();
 	}
 
 	private class ClickOnGrid extends MouseAdapter {
@@ -83,14 +110,46 @@ public class GridUI extends JPanel implements Config{
 			if (e.getButton() == MouseEvent.BUTTON1) { // left button pressed
 				if (clickedGrid.isMine()) {
 					clickedGrid.setLabelText("M");
-					clickedGrid.getLabel().setBackground(Color.LIGHT_GRAY);
+					clickedGrid.getLabel().setBackground(Color.RED);
+					showMinesInGrid();
 				} else {
 					showContiguousZeroMineGrids(clickedGrid.getRow(), clickedGrid.getCol());
 				}
 			} else if (e.getButton() == MouseEvent.BUTTON3) { // right button pressed
-				JOptionPane.showMessageDialog(null, "BUTTON3"); 
+				flagMine(clickedGrid.getRow(), clickedGrid.getCol());
 			}
 			
+			int totalgrids = gridRows * gridCols;
+			System.out.println("flaggedMines: " + flaggedMines);
+			System.out.println("exposedMines: " + exposedMines);
+			if (flaggedMines + exposedMines == totalgrids) {
+				System.out.println("Show game result");
+			}
+
+		}
+		
+		
+		private void flagMine(int row, int col) {
+			if (theGrid[row][col].isExposed()) {
+				return;
+			} 
+			
+			if(theGrid[row][col].isFlagged()) {
+				flaggedMines--;
+				theGrid[row][col].setFlagged(false);
+				theGrid[row][col].setLabelText("");
+				if (theGrid[row][col].isMine()) {
+					foundMines--;
+				}
+			} else {
+				flaggedMines++;
+				theGrid[row][col].setFlagged(true);
+				theGrid[row][col].setLabelText("F");
+				if (theGrid[row][col].isMine()) {
+					foundMines++;
+				}
+			}
+
 		}
 		
 		private void showContiguousZeroMineGrids(int row, int col) {
@@ -105,12 +164,22 @@ public class GridUI extends JPanel implements Config{
 				theGrid[row][col].getLabel().setBackground(Color.LIGHT_GRAY);
 				theGrid[row][col].setLabelText(Integer.toString(theGrid[row][col].getMineCount()));
 				theGrid[row][col].setExposed(true);
+				exposedMines++;
+				repaint();
 				return;
 			} else {
 				theGrid[row][col].getLabel().setBackground(Color.LIGHT_GRAY);
 				theGrid[row][col].setExposed(true);
-				for (int i = row - 1; i <= row + 1; i ++) {
+				exposedMines++;
+				repaint();
+				for (int i = row - 1; i <= row + 1; i++) {
+					if (i <0 || i >= gridRows) {
+						continue;
+					}
 					for (int j = col - 1; j <= col + 1; j++) {
+						if (j < 0 || j >= gridCols) {
+							continue;
+						}
 						if (i == row && j== col) {
 							continue;
 						}

@@ -13,5 +13,8 @@ public interface Config {
 	
 	public static final int GRID_SIZE = 25;
 	public static final int[] MINES = {10, 50, 100};
+	
+	public static final int LOSE = 0;
+	public static final int WIN = 1;
 
 }

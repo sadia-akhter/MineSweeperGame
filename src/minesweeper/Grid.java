@@ -16,6 +16,7 @@ public class Grid extends JPanel {
 	private int x;
 	private int y;
 	private boolean exposed;
+	private boolean flagged;
 	
 	public Grid(int size, int row, int col) {
 		if (size < 0) {
@@ -28,6 +29,8 @@ public class Grid extends JPanel {
 		y = col;
 		labelText = "";
 		exposed = false;
+		flagged = false;
+		
 		Dimension dim = new Dimension(size, size);
 		setMinimumSize(dim);
 		setPreferredSize(dim);
@@ -63,6 +66,7 @@ public class Grid extends JPanel {
 	
 	public void setMine(boolean isMine) {
 		this.isMine = isMine;
+		mineCount = 0;
 	}
 	
 	public boolean setMineCount(int newCount) {
@@ -75,6 +79,9 @@ public class Grid extends JPanel {
 	}
 	
 	public boolean incrementMineCount() {
+		if (isMine) {
+			return false;
+		}
 		if (mineCount == MAX_MINE_COUNT) {
 			return false;
 		} else {
@@ -97,6 +104,14 @@ public class Grid extends JPanel {
 	
 	public void setExposed(boolean ex) {
 		exposed = ex;
+	}
+	
+	public boolean isFlagged() {
+		return flagged == true;
+	}
+	
+	public void setFlagged(boolean flag) {
+		flagged = flag;
 	}
 	
 	@Override
