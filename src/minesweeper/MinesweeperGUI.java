@@ -3,14 +3,18 @@ package minesweeper;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.NumberFormat;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 
 
@@ -32,6 +36,11 @@ public class MinesweeperGUI extends JPanel implements Config{
 	private int flaggedMines;
 	private int exposedMines;
 //	private int totalgrids;
+	// timer
+	private ClockListener clockListener;
+	private Timer timer;
+	private boolean timerRunning;
+
 
 	
 	public MinesweeperGUI(int gameLevel) {
@@ -48,7 +57,7 @@ public class MinesweeperGUI extends JPanel implements Config{
 		flaggedMines = 0;
 		exposedMines = 0;
 //		totalgrids = gridRows * gridCols;
-
+		timerRunning = false;
 		
 		this.setLayout(new BorderLayout());
 		
@@ -91,7 +100,7 @@ public class MinesweeperGUI extends JPanel implements Config{
 		timerLabel.setBorder(blackBorder);
 		comboPanel.add(timerLabel);
 		
-		minesLeftLabel = new JLabel("10", SwingConstants.RIGHT);
+		minesLeftLabel = new JLabel(Integer.toString(mines), SwingConstants.RIGHT);
 		minesLeftLabel.setBorder(blackBorder);
 		comboPanel.add(minesLeftLabel);
 		
@@ -99,6 +108,12 @@ public class MinesweeperGUI extends JPanel implements Config{
 		this.add(gridPanel, BorderLayout.CENTER);
 		
 	
+		// timer
+		clockListener = new ClockListener();
+		timer = new Timer(10, clockListener);
+		timer.setInitialDelay(0);
+		
+		
 	}
 	
 	private void incrementNeighborMineCount(int row, int col) {
@@ -143,6 +158,10 @@ public class MinesweeperGUI extends JPanel implements Config{
 	private class ClickOnGrid extends MouseAdapter {
 		@Override
 		public void mouseClicked(MouseEvent e) {
+			if (!timerRunning) {
+				timerRunning = true;
+				timer.start();
+			}
 			Grid clickedGrid = (Grid)e.getSource();
 			
 			if (e.getButton() == MouseEvent.BUTTON1) { // left button pressed
@@ -176,10 +195,12 @@ public class MinesweeperGUI extends JPanel implements Config{
 				flaggedMines--;
 				theGrid[row][col].setFlagged(false);
 				theGrid[row][col].setLabelText("");
+				minesLeftLabel.setText(Integer.toString(mines - flaggedMines));
 			} else {
 				flaggedMines++;
 				theGrid[row][col].setFlagged(true);
 				theGrid[row][col].setLabelText("F");
+				minesLeftLabel.setText(Integer.toString(mines - flaggedMines));
 			}
 
 		}
@@ -222,5 +243,22 @@ public class MinesweeperGUI extends JPanel implements Config{
 		}
 	}	
 
-	
+	private class ClockListener implements ActionListener {
+		private double time;
+		NumberFormat numberForm;
+		
+		public ClockListener() {
+			time = 0;
+			numberForm = NumberFormat.getNumberInstance();
+			numberForm.setMaximumFractionDigits(3);
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			timerLabel.setText(numberForm.format(time));
+		
+			time += 0.01;
+		}
+	}
+
 }
