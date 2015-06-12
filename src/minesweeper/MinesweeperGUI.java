@@ -1,19 +1,29 @@
 package minesweeper;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.NumberFormat;
 import java.util.Random;
 
-import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.Border;
 
 
 @SuppressWarnings("serial")
-public class GridUI extends JPanel implements Config{
+public class MinesweeperGUI extends JPanel implements Config{
+
+	// Fields for GUI
+	private JPanel gridPanel;
+	private JPanel comboPanel;	
+	private JLabel timerLabel;
+	private JLabel minesLeftLabel;
+	
+	// Fields for game logic
 	private int level;
 	private int gridRows;
 	private int gridCols;
@@ -21,18 +31,15 @@ public class GridUI extends JPanel implements Config{
 	private Grid[][] theGrid;
 	private int flaggedMines;
 	private int exposedMines;
-	private int totalgrids;
-	// timer
-	private final ClockListener clockListener = new ClockListener();
-	private final Timer timer = new Timer(100, clockListener);
-	private final JLabel timeLabel = new JLabel();
+//	private int totalgrids;
 
 	
-	public GridUI(int gameLevel) {
+	public MinesweeperGUI(int gameLevel) {
+		
 		if (gameLevel != BEGINNER && gameLevel != INTERMEDIATE && gameLevel !=EXPERT) {
 			System.exit(0);
 		}
-		
+
 		level = gameLevel;
 		gridRows = GRID_DIMENSTIONS[level][0];
 		gridCols = GRID_DIMENSTIONS[level][1];
@@ -40,10 +47,14 @@ public class GridUI extends JPanel implements Config{
 		theGrid = new Grid[gridRows][gridCols];
 		flaggedMines = 0;
 		exposedMines = 0;
-		totalgrids = gridRows * gridCols;
-		System.out.println("totalgrids: " + totalgrids);
+//		totalgrids = gridRows * gridCols;
 
-		setLayout(new GridLayout(gridRows, gridCols));
+		
+		this.setLayout(new BorderLayout());
+		
+		gridPanel = new JPanel();
+		gridPanel.setLayout(new GridLayout(gridRows, gridCols));
+		
 		Border blackBorder = BorderFactory.createLineBorder(Color.BLACK);
 		
 		for (int i = 0; i < gridRows; i++) {
@@ -51,11 +62,12 @@ public class GridUI extends JPanel implements Config{
 				Grid grid = new Grid(GRID_SIZE, i, j);
 				grid.setBorder(blackBorder);
 				grid.addMouseListener(new ClickOnGrid());
-				add(grid);
+				gridPanel.add(grid);
 				theGrid[i][j] = grid;
 			}
 		}	
 				
+
 		Random r = new Random();
 		int count = 0;
 		int row, col;
@@ -69,11 +81,24 @@ public class GridUI extends JPanel implements Config{
 				incrementNeighborMineCount(row, col);				
 			}		
 		}
-		
-		// timer
-		timer.setInitialDelay(0);
 
 		
+		
+		comboPanel = new JPanel();
+		comboPanel.setLayout(new GridLayout(1,2));
+		
+		timerLabel = new JLabel("0.0");
+		timerLabel.setBorder(blackBorder);
+		comboPanel.add(timerLabel);
+		
+		minesLeftLabel = new JLabel("10", SwingConstants.RIGHT);
+		minesLeftLabel.setBorder(blackBorder);
+		comboPanel.add(minesLeftLabel);
+		
+		this.add(comboPanel, BorderLayout.PAGE_START);
+		this.add(gridPanel, BorderLayout.CENTER);
+		
+	
 	}
 	
 	private void incrementNeighborMineCount(int row, int col) {
@@ -114,8 +139,7 @@ public class GridUI extends JPanel implements Config{
 		repaint();
 	}
 
-	
-	
+
 	private class ClickOnGrid extends MouseAdapter {
 		@Override
 		public void mouseClicked(MouseEvent e) {
@@ -198,24 +222,5 @@ public class GridUI extends JPanel implements Config{
 		}
 	}	
 
-	private class ClockListener implements ActionListener {
-		private double time;
-		NumberFormat numberForm;
-		
-		public ClockListener() {
-			time = 0;
-			numberForm = NumberFormat.getNumberInstance();
-			numberForm.setMaximumFractionDigits(3);
-		}
-		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			timeLabel.setText(numberForm.format(time));
-		
-			time += 0.1;
-		}
-	}
 	
-
-
 }
