@@ -16,7 +16,7 @@ public class GameSimulator extends JFrame implements Config {
 		this.setMinimumSize(min);
 		this.setSize(min);
 		this.setLocationRelativeTo(null);
-		JPanel gameGUI = new MinesweeperGUI(BEGINNER);
+		JPanel gameGUI = new MinesweeperGUI(this, BEGINNER);
 		this.setContentPane(gameGUI);
 	}
 

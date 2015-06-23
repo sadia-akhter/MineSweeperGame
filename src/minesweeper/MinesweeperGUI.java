@@ -11,7 +11,9 @@ import java.text.NumberFormat;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
@@ -21,6 +23,7 @@ import javax.swing.border.Border;
 @SuppressWarnings("serial")
 public class MinesweeperGUI extends JPanel implements Config{
 
+	private JFrame frame;
 	// Fields for GUI
 	private JPanel gridPanel;
 	private JPanel comboPanel;	
@@ -35,7 +38,7 @@ public class MinesweeperGUI extends JPanel implements Config{
 	private Grid[][] theGrid;
 	private int flaggedMines;
 	private int exposedMines;
-//	private int totalgrids;
+	private boolean gameOver;
 	// timer
 	private ClockListener clockListener;
 	private Timer timer;
@@ -43,12 +46,13 @@ public class MinesweeperGUI extends JPanel implements Config{
 
 
 	
-	public MinesweeperGUI(int gameLevel) {
+	public MinesweeperGUI(JFrame jframe, int gameLevel) {
 		
 		if (gameLevel != BEGINNER && gameLevel != INTERMEDIATE && gameLevel !=EXPERT) {
 			System.exit(0);
 		}
 
+		frame = jframe;
 		level = gameLevel;
 		gridRows = GRID_DIMENSTIONS[level][0];
 		gridCols = GRID_DIMENSTIONS[level][1];
@@ -56,8 +60,8 @@ public class MinesweeperGUI extends JPanel implements Config{
 		theGrid = new Grid[gridRows][gridCols];
 		flaggedMines = 0;
 		exposedMines = 0;
-//		totalgrids = gridRows * gridCols;
 		timerRunning = false;
+		gameOver = true;
 		
 		this.setLayout(new BorderLayout());
 		
@@ -157,34 +161,49 @@ public class MinesweeperGUI extends JPanel implements Config{
 
 	private class ClickOnGrid extends MouseAdapter {
 		@Override
-		public void mouseClicked(MouseEvent e) {
-			if (!timerRunning) {
-				timerRunning = true;
-				timer.start();
-			}
+		public void mouseClicked(MouseEvent e) {			
 			Grid clickedGrid = (Grid)e.getSource();
 			
 			if (e.getButton() == MouseEvent.BUTTON1) { // left button pressed
+				if (!timerRunning) {
+					gameOver = false;
+					timerRunning = true;
+					timer.start();
+				}
+				if(gameOver) {
+					return;
+				}
 				if (clickedGrid.isMine()) {
 					clickedGrid.setLabelText("M");
 					clickedGrid.getLabel().setBackground(Color.RED);
 					showMinesInGrid();
+					stopGame();
+					JOptionPane.showMessageDialog(frame, "Mine Explodes!\nGame Over");
 				} else {
 					showContiguousZeroMineGrids(clickedGrid.getRow(), clickedGrid.getCol());
 				}
 			} else if (e.getButton() == MouseEvent.BUTTON3) { // right button pressed
+				if(gameOver) {
+					return;
+				}
+
 				flagMine(clickedGrid.getRow(), clickedGrid.getCol());
 			}
 			
 			int totalgrids = gridRows * gridCols;
-			System.out.println("flaggedMines: " + flaggedMines);
-			System.out.println("exposedMines: " + exposedMines);
 			if (flaggedMines + exposedMines == totalgrids) {
-				System.out.println("Show game result");
+				// successfully completed the game
+				stopGame();
+				JOptionPane.showMessageDialog(frame, "You win!");
 			}
 
 		}
 		
+		private void stopGame() {
+			timer.stop();
+			timerRunning = false;
+			gameOver = true;			
+		}
 		
 		private void flagMine(int row, int col) {
 			if (theGrid[row][col].isExposed()) {
@@ -196,6 +215,7 @@ public class MinesweeperGUI extends JPanel implements Config{
 				theGrid[row][col].setFlagged(false);
 				theGrid[row][col].setLabelText("");
 				minesLeftLabel.setText(Integer.toString(mines - flaggedMines));
+				repaint();
 			} else {
 				flaggedMines++;
 				theGrid[row][col].setFlagged(true);
@@ -210,7 +230,7 @@ public class MinesweeperGUI extends JPanel implements Config{
 					|| col < 0 || col >= gridCols) {
 				return;
 			} 
-			if (theGrid[row][col].isExposed()) {
+			if (theGrid[row][col].isExposed() || theGrid[row][col].isFlagged()) {
 				return;
 			} 
 			if (theGrid[row][col].getMineCount() != 0) {

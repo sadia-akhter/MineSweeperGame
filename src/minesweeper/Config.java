@@ -11,7 +11,7 @@ public interface Config {
 		{100, 100} // for EXPERT
 	};
 	
-	public static final int GRID_SIZE = 30;
+	public static final int GRID_SIZE = 50;
 	public static final int[] MINES = {10, 50, 100};
 	
 	public static final int LOSE = 0;
