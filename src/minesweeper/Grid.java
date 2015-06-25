@@ -1,7 +1,6 @@
 package minesweeper;
 
 import java.awt.*;
-
 import javax.swing.*;
 
 @SuppressWarnings("serial")
@@ -17,8 +16,9 @@ public class Grid extends JPanel {
 	private int y;
 	private boolean exposed;
 	private boolean flagged;
+//	private Color gridColor;
 	
-	public Grid(int size, int row, int col) {
+	public Grid(int size, Color gridColor, int row, int col) {
 		if (size < 0) {
 			System.exit(0);
 		}
@@ -30,12 +30,14 @@ public class Grid extends JPanel {
 		labelText = "";
 		exposed = false;
 		flagged = false;
+//		this.gridColor = gridColor;
 		
 		Dimension dim = new Dimension(size, size);
 		setMinimumSize(dim);
 		setPreferredSize(dim);
 		setMaximumSize(dim);
 		label = new JLabel(labelText, JLabel.CENTER);
+		label.setBackground(gridColor);
 		label.setForeground(Color.BLACK);
 		label.setOpaque(true);
 		setLayout(new BorderLayout());
@@ -57,6 +59,16 @@ public class Grid extends JPanel {
 	
 	public String getLabelText() {
 		return labelText;
+	}
+	
+	public Color getGridColor() {
+		return label.getBackground();
+	}
+	
+	public Color setGridColor(Color newColor) {
+		Color oldGridColor = label.getBackground();
+		label.setBackground(newColor);
+		return oldGridColor;
 	}
 	
 	public void setLabelText(String newLabelText) {

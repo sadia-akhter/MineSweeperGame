@@ -46,9 +46,10 @@ public class GridUI extends JPanel implements Config{
 		setLayout(new GridLayout(gridRows, gridCols));
 		Border blackBorder = BorderFactory.createLineBorder(Color.BLACK);
 		
+		int color=0;
 		for (int i = 0; i < gridRows; i++) {
 			for (int j = 0; j < gridCols; j++) {
-				Grid grid = new Grid(GRID_SIZE, i, j);
+				Grid grid = new Grid(GRID_SIZE, GRID_COLORS[++color % 2], i, j);
 				grid.setBorder(blackBorder);
 				grid.addMouseListener(new ClickOnGrid());
 				add(grid);
